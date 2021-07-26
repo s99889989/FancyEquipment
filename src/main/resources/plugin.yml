@@ -1,0 +1,6 @@
+name: FancyEquipment
+version: @version@
+main: com.daxton.fancyequipment.FancyEquipment
+api-version: 1.16
+prefix: FancyEquipment
+authors: [ s99889989 ]
