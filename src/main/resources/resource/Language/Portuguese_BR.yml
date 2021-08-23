@@ -1,0 +1,5 @@
+LogMessage:
+  Reload: '§aLeia novamente o arquivo de configuração.'
+  LoadFancyCore: '§aFancyCore carregado.'
+OpMessage:
+  Reload: '§e[FancyEquipment] §aLeia novamente o arquivo de configuração.'

@@ -1,6 +1,12 @@
 name: FancyEquipment
 version: @version@
 main: com.daxton.fancyequipment.FancyEquipment
-api-version: 1.16
+api-version: 1.13
 prefix: FancyEquipment
+softdepend: [FancyCore]
 authors: [ s99889989 ]
+description: equipment
+commands:
+  fancyequipment:
+    description: Basic instructions.
+    aliases: feqm

@@ -1,0 +1,5 @@
+LogMessage:
+  Reload: '§a重新讀取設定檔。'
+  LoadFancyCore: '§aFancyCore 已加載。'
+OpMessage:
+  Reload: '§e[FancyEquipment] §a重新讀取設定檔。'
