@@ -1,11 +1,9 @@
 package com.daxton.fancyequipment;
 
-
 import static com.daxton.fancyequipment.config.FileConfig.languageConfig;
 
 import com.daxton.fancyequipment.config.FileConfig;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 public class DependPlugins {
 

@@ -4,10 +4,11 @@ package com.daxton.fancyequipment;
 import com.daxton.fancyequipment.command.MainCommand;
 import com.daxton.fancyequipment.command.TabCommand;
 import com.daxton.fancyequipment.listener.PlayerListener;
+import com.daxton.fancyequipment.manager.ManagerEqm;
 import com.daxton.fancyequipment.task.Start;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-
+import static com.daxton.fancyequipment.config.FileConfig.languageConfig;
 import java.util.Objects;
 
 public final class FancyEquipment extends JavaPlugin {
@@ -34,6 +35,16 @@ public final class FancyEquipment extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        //儲存玩家裝備
+        if(languageConfig != null){
+            FancyEquipment.fancyEquipment.getLogger().info(languageConfig.getString("LogMessage.StorageEquipment"));
+        }else {
+            FancyEquipment.fancyEquipment.getLogger().info("Store player equipment.");
+        }
+
+        for(PlayerEqmData playerEqmData : ManagerEqm.player_Data.values()){
+            playerEqmData.saveEqmConfig();
+        }
         FancyEquipment.fancyEquipment.getLogger().info("§4FancyEquipment uninstall.");
     }
 }
