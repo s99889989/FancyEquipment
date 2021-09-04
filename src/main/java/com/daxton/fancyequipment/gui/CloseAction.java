@@ -1,8 +1,10 @@
 package com.daxton.fancyequipment.gui;
 
-import com.daxton.fancycore.api.gui.GuiCloseAction;
+
+import com.daxton.fancycore.api.gui.button.GuiCloseAction;
 import com.daxton.fancyequipment.PlayerEqmData;
 import com.daxton.fancyequipment.config.FileConfig;
+import com.daxton.fancyequipment.gui.equipmentbar.ClickEqm;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class CloseAction implements GuiCloseAction {
@@ -21,8 +23,11 @@ public class CloseAction implements GuiCloseAction {
 			if(!eqmString.equalsIgnoreCase("Main")){
 				int row = eqmConfig.getInt(eqmString +".SlotRow");
 				int columns = eqmConfig.getInt(eqmString +".SlotColumns");
-				Outfit outfit = (Outfit) playerEqmData.gui.getAction(row, columns);
-				outfit.oldSlot = -1;
+				ClickEqm outfit = (ClickEqm) playerEqmData.gui.getButtons(row, columns).guiAction;
+				if(outfit != null){
+					outfit.oldSlot = -1;
+				}
+
 			}
 
 		});

@@ -1,6 +1,8 @@
 package com.daxton.fancyequipment.gui;
 
-import com.daxton.fancycore.api.gui.GuiAction;
+
+import com.daxton.fancycore.FancyCore;
+import com.daxton.fancycore.api.gui.button.GuiAction;
 import com.daxton.fancyequipment.PlayerEqmData;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;

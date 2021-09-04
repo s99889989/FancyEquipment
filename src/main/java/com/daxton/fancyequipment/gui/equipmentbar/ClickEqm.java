@@ -1,8 +1,13 @@
-package com.daxton.fancyequipment.gui;
+package com.daxton.fancyequipment.gui.equipmentbar;
 
-import com.daxton.fancycore.api.gui.GuiAction;
-import com.daxton.fancycore.api.gui.GuiButtom;
+import com.daxton.fancycore.api.gui.button.GuiAction;
+import com.daxton.fancycore.api.gui.button.GuiButton;
+import com.daxton.fancycore.api.gui.item.GuiItem;
 import com.daxton.fancycore.api.item.ItemKeySearch;
+import com.daxton.fancycore.manager.PlayerManagerCore;
+import com.daxton.fancycore.other.entity.BukkitAttributeSet;
+import com.daxton.fancycore.other.playerdata.PlayerDataFancy;
+import com.daxton.fancyequipment.FancyEquipment;
 import com.daxton.fancyequipment.PlayerEqmData;
 import com.daxton.fancyequipment.config.FileConfig;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,26 +15,31 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-public class Outfit implements GuiAction {
+public class ClickEqm implements GuiAction {
 
 	ItemStack itemStack;
 	public int oldSlot = -1;
-	final PlayerEqmData playerEqmData;
-	final String eqmString;
+	public final PlayerEqmData playerEqmData;
+	public final PlayerDataFancy playerDataFancy;
+	//物品欄位置名稱
+	public final String eqmString;
+	//物品欄需求名稱
 	final String restrictionType;
 	final int row;
 	final int columns;
 	boolean show = true;
 
 	//裝備欄按鈕
-	public Outfit(PlayerEqmData playerEqmData, String eqmString, String restrictionType, ItemStack itemStack, int row, int columns){
+	public ClickEqm(PlayerEqmData playerEqmData, String eqmString, String restrictionType, ItemStack itemStack, int row, int columns){
 		this.playerEqmData = playerEqmData;
 		this.eqmString = eqmString;
 		this.restrictionType = restrictionType;
 		this.itemStack = itemStack;
 		this.row = row;
 		this.columns = columns;
+		this.playerDataFancy = PlayerManagerCore.player_Data_Map.get(playerEqmData.uuid);
 	}
 
 	public void execute(ClickType clickType, InventoryAction action, int slot){
@@ -38,7 +48,7 @@ public class Outfit implements GuiAction {
 		}
 		//右鍵切換裝備顯示
 		if(clickType == ClickType.RIGHT){
-			right();
+			SetShow.right(this);
 		}
 
 	}
@@ -48,6 +58,7 @@ public class Outfit implements GuiAction {
 		Player player = playerEqmData.player;
 		ItemStack clickItem = getEqmItem();
 		if(clickItem != null){
+
 			//檢查裝是否符合類型
 			if(isType(clickItem)){
 				return;
@@ -55,48 +66,9 @@ public class Outfit implements GuiAction {
 			//安裝裝備
 			addEqm(player, clickItem);
 		}else {
+
 			//移除裝備
 			removeEqm(player);
-		}
-	}
-
-	//右鍵切換裝備顯示
-	public void right(){
-		if(eqmString.equalsIgnoreCase("Armor_Pants")){
-			if(show){
-				show = false;
-				playerEqmData.bodyEntity.equipment(null, "HEAD");
-			}else {
-				if(playerEqmData.eqm_Map.get("Armor_Pants") != null){
-					show = true;
-					playerEqmData.bodyEntity.equipment(playerEqmData.eqm_Map.get("Armor_Pants"), "HEAD");
-				}
-			}
-
-		}
-		if(eqmString.equalsIgnoreCase("Armor_Back")){
-			if(show){
-				show = false;
-				playerEqmData.bodyEntity.equipment(null, "OFFHAND");
-			}else {
-				if(playerEqmData.eqm_Map.get("Armor_Back") != null){
-					show = true;
-					playerEqmData.bodyEntity.equipment(playerEqmData.eqm_Map.get("Armor_Back"), "OFFHAND");
-				}
-			}
-
-		}
-		if(eqmString.equalsIgnoreCase("Armor_Tail")){
-			if(show){
-				show = false;
-				playerEqmData.bodyEntity.equipment(null, "MAINHAND");
-			}else {
-				if(playerEqmData.eqm_Map.get("Armor_Tail") != null){
-					show = true;
-					playerEqmData.bodyEntity.equipment(playerEqmData.eqm_Map.get("Armor_Tail"), "MAINHAND");
-				}
-			}
-
 		}
 	}
 
@@ -136,9 +108,20 @@ public class Outfit implements GuiAction {
 		String itemType = "";
 		if(!clickItemID.isEmpty()){
 			itemType = clickItemID.split("\\.")[0];
+
+		}
+
+		if(restrictionType == null){
+			return true;
+		}
+
+		//FancyEquipment.fancyEquipment.getLogger().info(restrictionType+" : "+itemType);
+
+		if(restrictionType.equalsIgnoreCase(itemType)){
+			return false;
 		}
 		//這格物品類型去比較物品類型
-		return restrictionType == null || restrictionType.equalsIgnoreCase(itemType);
+		return true;
 	}
 
 	//移除裝備
@@ -148,7 +131,7 @@ public class Outfit implements GuiAction {
 				return;
 			}
 			FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
-			ItemStack eqmStack = GuiButtom.valueOf(eqmConfig, eqmString);
+			ItemStack eqmStack = GuiItem.valueOf(eqmConfig, eqmString);
 			if(oldSlot != -1){
 				player.getInventory().setItem(oldSlot, itemStack);
 				oldSlot = -1;
@@ -164,48 +147,95 @@ public class Outfit implements GuiAction {
 				playerEqmData.setBag();
 			}
 			itemStack = null;
+			removeAttr();
 			playerEqmData.eqm_Map.put(eqmString, null);
 			if(eqmString.equalsIgnoreCase("Helmet")){
 				player.getInventory().setHelmet(null);
 			}
 			//裝備顯示
 			eqmDisplay(null);
+			GuiButton eqmButton = GuiButton.ButtonBuilder.getInstance().
+				setItemStack(eqmStack).
+				setGuiAction(this).
+				build();
 
-			playerEqmData.gui.setItem(eqmStack, false, row, columns);
+			playerEqmData.gui.setButton(eqmButton, row, columns);
+
+			playerDataFancy.removeEqmAction(eqmString);
+			playerDataFancy.removeCustomValue(eqmString);
 		}
 	}
 	//安裝裝備
 	public void addEqm(Player player, ItemStack clickItem){
-
+		if(clickItem.getAmount() > 1){
+			return;
+		}
+		//如果裝備欄不是空
 		if(itemStack != null){
 			//檢查玩家背包是否有空位，沒有就不執行
 			if(player.getInventory().firstEmpty() == -1){
 				return;
 			}
-
 			if(playerEqmData.selectSlot != -1){
 				int clickSlot = playerEqmData.selectSlot;
 				player.getInventory().setItem(clickSlot, itemStack);
 			}else {
 				player.getInventory().addItem(itemStack);
 			}
+			playerDataFancy.removeEqmAction(eqmString);
+			playerDataFancy.removeCustomValue(eqmString);
+		}else {
+			if(playerEqmData.selectSlot != -1){
+				int iSlot = playerEqmData.selectSlot;
+				player.getInventory().setItem(iSlot, null);
+			}
 		}
+
 		playerEqmData.eqm_Map.put(eqmString, clickItem);
 		if(eqmString.equalsIgnoreCase("Helmet")){
 			player.getInventory().setHelmet(clickItem);
 		}
 		//裝備顯示
 		eqmDisplay(clickItem);
+		GuiButton clickButton = GuiButton.ButtonBuilder.getInstance().
+			setItemStack(clickItem).
+			setGuiAction(this).
+			build();
+		playerEqmData.gui.setButton(clickButton, row, columns);
 
-		playerEqmData.gui.setItem(clickItem, false, row, columns);
+		addttr(clickItem);
 
 		itemStack = clickItem;
-		int iSlot = playerEqmData.selectSlot;
-		player.getInventory().setItem(iSlot, null);
+
 
 		playerEqmData.selectSlot = -1;
+
+		playerDataFancy.addEqmAction(eqmString, itemStack);
+		playerDataFancy.addEqmCustomValue(eqmString, itemStack);
 	}
+	//移除屬性
+	public void removeAttr(){
+		BukkitAttributeSet.removeLabelAttr(playerEqmData.player, eqmString);
+	}
+	//增加屬性
+	public void addttr(ItemStack eqmItem){
+		if(eqmItem == null){
+			return;
+		}
+		ItemMeta itemMeta = eqmItem.getItemMeta();
+		if(itemMeta.getAttributeModifiers() != null){
 
+			itemMeta.getAttributeModifiers().forEach((attribute, attributeModifier) -> {
+				//FancyEquipment.fancyEquipment.getLogger().info("屬性: "+attribute.name()+" : "+attributeModifier.getName());
+				String inherit = attribute.name();
+				String operation = attributeModifier.getOperation().name();
+				double addNumber = attributeModifier.getAmount();
+				String label = eqmString;
+				BukkitAttributeSet.removeAddAttribute(playerEqmData.player, inherit, operation, addNumber, label);
+			});
 
+		}
+
+	}
 
 }

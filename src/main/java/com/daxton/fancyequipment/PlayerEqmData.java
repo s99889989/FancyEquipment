@@ -2,14 +2,23 @@ package com.daxton.fancyequipment;
 
 import static com.daxton.fancyequipment.config.FileConfig.languageConfig;
 
+
+import com.daxton.fancyaction.api.PlayerDataAction;
+import com.daxton.fancyaction.manager.PlayerManagerAction;
+import com.daxton.fancycore.FancyCore;
 import com.daxton.fancycore.api.gui.GUI;
-import com.daxton.fancycore.api.gui.GuiButtom;
-import com.daxton.fancycore.other.task.PackEntity;
+import com.daxton.fancycore.api.gui.button.GuiButton;
+import com.daxton.fancycore.api.gui.item.GuiItem;
+import com.daxton.fancycore.api.item.ItemKeySearch;
+import com.daxton.fancycore.manager.PlayerManagerCore;
+import com.daxton.fancycore.other.playerdata.PlayerDataFancy;
 import com.daxton.fancycore.other.task.guise.GuiseEntity;
+import com.daxton.fancycore.other.taskaction.StringToMap;
 import com.daxton.fancyequipment.config.FileConfig;
 import com.daxton.fancyequipment.gui.CloseAction;
-import com.daxton.fancyequipment.gui.Outfit;
+import com.daxton.fancyequipment.gui.equipmentbar.ClickEqm;
 import com.daxton.fancyequipment.gui.SelectItem;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,23 +58,185 @@ public class PlayerEqmData {
 		//建立玩家設定檔
 		createDataFile();
 		//設置外觀盔甲架
-		display();
+		//display();
 		//設置初始裝備設定
-		setDefaultEqm();
+		//setDefaultEqm();
 		//設置裝備欄
 		setGui();
 
 	}
 
+
+	//把目前背包內容儲存到Map
+	public void setBag(){
+		int x = 0;
+		for(ItemStack i : player.getInventory()){
+			if(x < 36){
+				bags[x] = i;
+			}
+			x++;
+		}
+	}
+
+	//設置裝備欄GUI
+	public void setGui(){
+
+		GUI gui = GUI.GUIBuilder.getInstance().setPlayer(player).setSize(54).setTitle(languageConfig.getString("Title")).build();
+
+			FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
+		PlayerDataFancy playerDataFancy = PlayerManagerCore.player_Data_Map.get(player.getUniqueId());
+		eqmConfig.getConfigurationSection("").getKeys(false).forEach(eqmString -> {
+
+			int row = eqmConfig.getInt(eqmString +".SlotRow");
+			int columns = eqmConfig.getInt(eqmString +".SlotColumns");
+
+			String restrictionType = eqmConfig.getString(eqmString+".RestrictionType");
+
+			FileConfiguration playerDataConfig = FileConfig.config_Map.get("playerdata/"+uuid+".yml");
+			if(playerDataConfig.contains(eqmString)){
+				ItemStack playerEqm = playerDataConfig.getItemStack(eqmString);
+				GuiButton playerEqmButton = GuiButton.ButtonBuilder.getInstance().
+					setItemStack(playerEqm).
+					setGuiAction(new ClickEqm(this, eqmString, restrictionType, playerEqm, row, columns)).
+					build();
+				gui.setButton(playerEqmButton, row, columns);
+				if(!eqmString.equalsIgnoreCase("Main")){
+					playerDataFancy.removeEqmAction(eqmString);
+					playerDataFancy.addEqmAction(eqmString, playerEqm);
+					playerDataFancy.removeCustomValue(eqmString);
+					playerDataFancy.addEqmCustomValue(eqmString, playerEqm);
+				}
+			}else {
+				GuiButton playerEqmButton = GuiButton.ButtonBuilder.getInstance().
+					setGuiAction(new ClickEqm(this, eqmString, restrictionType, null, row, columns)).
+					setItemStack(GuiItem.valueOf(eqmConfig, eqmString)).
+					build();
+				gui.setButton(playerEqmButton, row, columns);
+			}
+
+		});
+
+		//背包內動作
+		Integer[] ing = new Integer[]{};
+		for(int i = 0; i < 36 ; i++){
+			GuiButton selectItemButton = GuiButton.ButtonBuilder.getInstance().
+				setGuiAction(new SelectItem(this)).
+				build();
+			gui.addButton(selectItemButton, 55, 90, ing);
+		}
+
+		//關閉時清除Map物品包包
+		gui.setGuiCloseAction(new CloseAction(this));
+
+		gui.setMove(false);
+		this.gui = gui;
+	}
+	//設置主手
+	public void setMain(){
+		ItemStack mainItem = player.getInventory().getItemInMainHand();
+		FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
+		int row = eqmConfig.getInt("Main"+".SlotRow");
+		int columns = eqmConfig.getInt("Main"+".SlotColumns");
+
+		if(mainItem.getType() != Material.AIR){
+
+			GuiButton mainButton = GuiButton.ButtonBuilder.getInstance().
+				setItemStack(mainItem).
+				build();
+			gui.setButton(mainButton, row, columns);
+		}else {
+			ItemStack itemStack = GuiItem.valueOf(eqmConfig, "Main");
+			GuiButton mainNullButton = GuiButton.ButtonBuilder.getInstance().
+				setItemStack(itemStack).
+				build();
+			gui.setButton(mainNullButton, row, columns);
+		}
+	}
+
+	//設置初始裝備顯示
+	public void setDefaultEqm(){
+		FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
+		eqmConfig.getConfigurationSection("").getKeys(false).forEach(eqmString-> eqm_Map.put(eqmString, null));
+		FileConfiguration dataConfig = getDataFile();
+
+		dataConfig.getConfigurationSection("").getKeys(false).forEach(eqmString->{
+			ItemStack itemStack = dataConfig.getItemStack(eqmString);
+			eqm_Map.put(eqmString, itemStack);
+
+			if(itemStack != null){
+				if(eqmString.equalsIgnoreCase("Armor_Pants")){
+					bodyEntity.equipment(itemStack, "HEAD");
+				}
+				if(eqmString.equalsIgnoreCase("Armor_Back")){
+					bodyEntity.equipment(itemStack, "OFFHAND");
+				}
+				if(eqmString.equalsIgnoreCase("Armor_Tail")){
+					bodyEntity.equipment(itemStack, "MAINHAND");
+				}
+			}
+
+		});
+	}
+
+	//建立玩家設定檔
+	public void createDataFile(){
+		File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
+		if(!file.exists()){
+			try {
+				if(file.createNewFile()){
+					FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(file);
+					FileConfig.config_Map.put("playerdata/"+uuid+".yml", fileConfiguration);
+				}
+			}catch (IOException exception){
+				exception.printStackTrace();
+			}
+		}
+	}
+	//獲取玩家設定檔
+	public FileConfiguration getDataFile(){
+		FileConfiguration fileConfiguration = FileConfig.config_Map.get("playerdata/"+uuid+".yml");
+		if(fileConfiguration == null){
+			File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
+			fileConfiguration = YamlConfiguration.loadConfiguration(file);
+		}
+		return fileConfiguration;
+	}
+	//把物品儲存到設定檔
+	public void saveEqmConfig(){
+		FileConfiguration playerDataConfig = getDataFile();
+		File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
+
+		eqm_Map.forEach(playerDataConfig::set);
+		try {
+			playerDataConfig.save(file);
+			FileConfig.config_Map.put("playerdata/"+uuid+".yml", playerDataConfig);
+		}catch (IOException exception){
+			exception.printStackTrace();
+		}
+	}
+	//裝備盔甲架顯示
 	public void display(){
 
+		if(bodyEntity != null){
+			bodyEntity.delete();
+			bodyEntity = null;
+		}
+
 		//身體
-		bodyEntity = new GuiseEntity(player.getLocation().add(2,2,0), "ARMOR_STAND", null, false, false, false);
+		bodyEntity = new GuiseEntity(player.getLocation().add(0,-4,0), "ARMOR_STAND", null, false, false, false);
 		bodyEntity.setVisible(true);
 		bodyEntity.equipment();
 		bodyEntity.setArmorStandAngle("rightarm", 0 , 0, 0);
 		bodyEntity.setArmorStandAngle("leftarm", 0 , 0, 0);
-		bodyEntity.mount(player.getEntityId());
+		bodyEntity.markArmorStand();
+
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				bodyEntity.mount(player.getEntityId());
+			}
+		}.runTaskLater(FancyEquipment.fancyEquipment, 1);
+
 
 		//頭部
 //		slimeEntity = new GuiseEntity(player.getLocation().add(0,2,0), "SLIME", null, true, false , false);
@@ -101,7 +272,6 @@ public class PlayerEqmData {
 //					}
 //				}.runTaskLater(FancyEquipment.fancyEquipment, 2);
 
-
 			}
 		};
 		bukkitRunnable.runTaskTimer(FancyEquipment.fancyEquipment, 0, 1);
@@ -116,123 +286,10 @@ public class PlayerEqmData {
 //		PackEntity.upTeam(player.getUniqueId(), ChatColor.BLUE, player.getName());
 
 	}
+
+
 	public double normalAbsoluteAngleDegrees(double angle) {
 		return (angle %= 360) >= 0 ? angle : (angle + 360);
-	}
-	//把目前背包內容儲存到Map
-	public void setBag(){
-		int x = 0;
-		for(ItemStack i : player.getInventory()){
-			if(x < 36){
-				bags[x] = i;
-			}
-			x++;
-		}
-	}
-
-	//設置GUI
-	public void setGui(){
-		GUI gui = new GUI(player, 54, languageConfig.getString("Title"));
-
-		FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
-		eqmConfig.getConfigurationSection("").getKeys(false).forEach(eqmString -> {
-
-			int row = eqmConfig.getInt(eqmString +".SlotRow");
-			int columns = eqmConfig.getInt(eqmString +".SlotColumns");
-			ItemStack itemStack = GuiButtom.valueOf(eqmConfig, eqmString);
-			gui.setItem(itemStack, false, row, columns);
-			String restrictionType = eqmConfig.getString(eqmString+".RestrictionType");
-
-
-			FileConfiguration playerDataConfig = FileConfig.config_Map.get("playerdata/"+uuid+".yml");
-			if(playerDataConfig.contains(eqmString)){
-				ItemStack playerEqm = playerDataConfig.getItemStack(eqmString);
-				gui.setItem(playerEqm, false, row, columns);
-				gui.setAction(new Outfit(this, eqmString, restrictionType, playerEqm, row, columns), row, columns);
-			}else {
-				gui.setAction(new Outfit(this, eqmString, restrictionType, null, row, columns), row, columns);
-			}
-
-		});
-
-		//背包內動作
-		List<Integer> ing = new ArrayList<>();
-		for(int i = 0; i < 36 ; i++){
-			gui.addAction(new SelectItem(this), 55, 90, ing);
-		}
-
-		//關閉時清除Map物品包包
-		gui.setCloseAction(new CloseAction(this));
-
-		gui.setMoveAll(false);
-		this.gui = gui;
-	}
-	//設置主手
-	public void setMain(){
-		ItemStack mainItem = player.getInventory().getItemInMainHand();
-		FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
-		int row = eqmConfig.getInt("Main"+".SlotRow");
-		int columns = eqmConfig.getInt("Main"+".SlotColumns");
-		ItemStack itemStack = GuiButtom.valueOf(eqmConfig, "Main");
-		if(mainItem.getType() != Material.AIR){
-			gui.setItem(mainItem, false, row, columns);
-		}else {
-			gui.setItem(itemStack, false, row, columns);
-		}
-	}
-
-	//設置初始裝備
-	public void setDefaultEqm(){
-		FileConfiguration eqmConfig = FileConfig.config_Map.get("equipment.yml");
-		eqmConfig.getConfigurationSection("").getKeys(false).forEach(eqmString-> eqm_Map.put(eqmString, null));
-		FileConfiguration dataConfig = getDataFile();
-		dataConfig.getConfigurationSection("").getKeys(false).forEach(eqmString->{
-			ItemStack itemStack = dataConfig.getItemStack(eqmString);
-			eqm_Map.put(eqmString, itemStack);
-
-			if(itemStack != null){
-				if(eqmString.equalsIgnoreCase("Armor_Pants")){
-					bodyEntity.equipment(itemStack, "HEAD");
-				}
-				if(eqmString.equalsIgnoreCase("Armor_Back")){
-					bodyEntity.equipment(itemStack, "OFFHAND");
-				}
-				if(eqmString.equalsIgnoreCase("Armor_Tail")){
-					bodyEntity.equipment(itemStack, "MAINHAND");
-				}
-			}
-
-		});
-
-
-	}
-
-	//建立玩家設定檔
-	public void createDataFile(){
-		File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
-		if(!file.exists()){
-			try {
-				file.createNewFile();
-			}catch (IOException exception){
-				exception.printStackTrace();
-			}
-		}
-	}
-	//獲取玩家設定檔
-	public FileConfiguration getDataFile(){
-		File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
-		return YamlConfiguration.loadConfiguration(file);
-	}
-	//把物品儲存到設定檔
-	public void saveEqmConfig(){
-		FileConfiguration playerDataConfig = getDataFile();
-		File file = new File(FancyEquipment.fancyEquipment.getDataFolder(),"playerdata/"+uuid+".yml");
-		eqm_Map.forEach(playerDataConfig::set);
-		try {
-			playerDataConfig.save(file);
-		}catch (IOException exception){
-			exception.printStackTrace();
-		}
 	}
 
 }

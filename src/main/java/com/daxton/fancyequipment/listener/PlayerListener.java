@@ -4,9 +4,11 @@ import com.daxton.fancyequipment.FancyEquipment;
 import com.daxton.fancyequipment.PlayerEqmData;
 import com.daxton.fancyequipment.config.FileConfig;
 import com.daxton.fancyequipment.manager.ManagerEqm;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -23,46 +25,41 @@ import static com.daxton.fancyequipment.config.FileConfig.languageConfig;
 
 public class PlayerListener implements Listener {
 
-    @EventHandler//當玩家登入
+    @EventHandler(priority = EventPriority.MONITOR)//當玩家登入
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-        player.getInventory().setHeldItemSlot(0);
         UUID uuid = player.getUniqueId();
         //建立玩家資料
-        if(ManagerEqm.player_Data.get(uuid) != null){
-            PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid);
-            playerEqmData.display();
-        }else {
+        if(ManagerEqm.player_Data.get(uuid) == null){
             PlayerEqmData playerEqmData = new PlayerEqmData(player);
+            playerEqmData.mainSlot = player.getInventory().getHeldItemSlot();
             ManagerEqm.player_Data.put(uuid, playerEqmData);
+        }else {
+            PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid);
+            playerEqmData.mainSlot = player.getInventory().getHeldItemSlot();
         }
 
-
-//        GuiseEntity guiseEntity = new GuiseEntity(player.getLocation().add(0,2,0), "SLIME", null, true, false , false, 123456);
-//        PackEntity.slimeSize(123456, -4);
-//        guiseEntity.setVisible(true);
-//        guiseEntity.mount(player.getEntityId());
-//
-//
-//        GuiseEntity guiseEntity2 = new GuiseEntity(player.getLocation().add(0,2,0), "ARMOR_STAND", null, false, false , false, 654321);
-//        guiseEntity2.setName("測試訊息123456789");
-//        guiseEntity2.markArmorStand();
-//        guiseEntity2.setVisible(true);
-//        guiseEntity2.mount(guiseEntity.getEntityID());
+        Bukkit.getOnlinePlayers().forEach(player1 -> {
+            UUID uuid1 = player1.getUniqueId();
+            if(ManagerEqm.player_Data.get(uuid1) != null){
+                PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid1);
+                playerEqmData.display();
+                playerEqmData.setDefaultEqm();
+            }
+        });
 
     }
     @EventHandler//當玩家登出
     public void onPlayerQuit(PlayerQuitEvent event){
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-
-        PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid);
-        playerEqmData.bukkitRunnable.cancel();
-        playerEqmData.slimeEntity.delete();
-        playerEqmData.slimeEntity = null;
-        playerEqmData.headEntity.delete();
-        playerEqmData.headEntity = null;
-
+        if(ManagerEqm.player_Data.get(uuid) != null){
+            PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid);
+            playerEqmData.bukkitRunnable.cancel();
+            playerEqmData.bodyEntity.delete();
+            playerEqmData.saveEqmConfig();
+            ManagerEqm.player_Data.remove(uuid);
+        }
     }
 
 

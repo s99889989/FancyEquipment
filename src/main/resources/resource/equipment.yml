@@ -1,2 +1,202 @@
+Armor_Deputy:
+  SlotRow: 1
+  SlotColumns: 2 
+  RestrictionType: Armor_Deputy
+  Material: Gunpowder
+  CustomModelData: 21
+  DisplayName: '§e防具-副手'
+  Lore:
+  - ''
+  - '§7防具-副手'
+  - '§7Armor4-Deputy'
 
+Armor_Armor:
+  SlotRow: 2
+  SlotColumns: 2
+  RestrictionType: Armor_Armor
+  Material: Gunpowder
+  CustomModelData: 22
+  DisplayName: '§e防具-盔甲'
+  Lore:
+  - ''
+  - '§7防具-盔甲'
+  - '§7Armor-Armor'
 
+Armor_Pants:
+  SlotRow: 3
+  SlotColumns: 2
+  RestrictionType: Armor_Cloak
+  Material: Gunpowder
+  CustomModelData: 23
+  DisplayName: '§e防具-披風'
+  Lore:
+  - ''
+  - '§7防具-披風'
+  - '§7Armor-Garments'
+
+Armor_Shoes:
+  SlotRow: 4
+  SlotColumns: 2
+  RestrictionType: Armor_Shoes
+  Material: Gunpowder
+  CustomModelData: 24
+  DisplayName: '§e防具-鞋子'
+  Lore:
+  - ''
+  - '§7防具-鞋子'
+  - '§7Armor-Shoes'
+
+Armor_Accessories1:
+  SlotRow: 5
+  SlotColumns: 2
+  RestrictionType: Armor_Accessories
+  Material: Gunpowder
+  CustomModelData: 25
+  DisplayName: '§e防具-飾品'
+  Lore:
+  - ''
+  - '§7防具-飾品'
+  - '§7Armor-Accessories'
+
+Armor_Accessories2:
+  SlotRow: 6
+  SlotColumns: 2
+  RestrictionType: Armor_Accessories
+  Material: Gunpowder
+  CustomModelData: 25
+  DisplayName: '§e防具-飾品'
+  Lore:
+  - ''
+  - '§7防具-飾品'
+  - '§7Armor-Accessories'
+
+Main:
+  SlotRow: 1
+  SlotColumns: 8
+  Material: Gunpowder
+  CustomModelData: 26
+  DisplayName: '§e武器'
+  Lore:
+  - ''
+  - '§7武器'
+  - '§7Weapon'
+
+Helmet:
+  SlotRow: 2
+  SlotColumns: 8
+  RestrictionType: Armor_Headdress
+  Material: Gunpowder
+  CustomModelData: 27
+  DisplayName: '§e防具-頭飾'
+  Lore:
+  - ''
+  - '§7防具-頭飾'
+  - '§7Armor-Headdress'
+
+Armor_Facial:
+  SlotRow: 3
+  SlotColumns: 8
+  RestrictionType: Armor_Facial
+  Material: Gunpowder
+  CustomModelData: 28
+  DisplayName: '§e防具-臉部'
+  Lore:
+  - ''
+  - '§7防具-臉部'
+  - '§7Armor-Facial'
+
+Armor_Mouth:
+  SlotRow: 4
+  SlotColumns: 8
+  RestrictionType: Armor_Mouth
+  Material: Gunpowder
+  CustomModelData: 29
+  DisplayName: '§e防具-嘴部'
+  Lore:
+  - ''
+  - '§7防具-嘴部'
+  - '§7Armor-Mouth'
+
+Armor_Back:
+  SlotRow: 5
+  SlotColumns: 8
+  RestrictionType: Armor_Back
+  Material: Gunpowder
+  CustomModelData: 30
+  DisplayName: '§e防具-背部'
+  Lore:
+  - ''
+  - '§7防具-背部'
+  - '§7Armor-Back'
+
+Armor_Tail:
+  SlotRow: 6
+  SlotColumns: 8
+  RestrictionType: Armor_Tail
+  Material: Gunpowder
+  CustomModelData: 31
+  DisplayName: '§e防具-尾部'
+  Lore:
+  - ''
+  - '§7防具-尾部'
+  - '§7Armor-Tail'
+
+Mount:
+  SlotRow: 6
+  SlotColumns: 5
+  RestrictionType: Mount
+  Material: Gunpowder
+  CustomModelData: 32
+  DisplayName: '§e坐騎'
+  Lore:
+  - ''
+  - '§7坐騎'
+  - '§7Mount'
+
+Artifact_Weapon:
+  SlotRow: 1
+  SlotColumns: 6
+  RestrictionType: Artifact_Weapon
+  Material: Gunpowder
+  CustomModelData: 33
+  DisplayName: '§e神器-武器'
+  Lore:
+  - ''
+  - '§7神器-武器'
+  - '§7Artifact-Weapon'
+
+Artifact_Headdress:
+  SlotRow: 2
+  SlotColumns: 6
+  RestrictionType: Artifact_Headdress
+  Material: Gunpowder
+  CustomModelData: 34
+  DisplayName: '§e神器-帽子'
+  Lore:
+  - ''
+  - '§7神器-帽子'
+  - '§7Artifact-Headdress'
+
+Artifact_Accessories:
+  SlotRow: 5
+  SlotColumns: 4
+  RestrictionType: Artifact_Accessories
+  Material: Gunpowder
+  CustomModelData: 35
+  DisplayName: '§e神器-飾品'
+  Lore:
+  - ''
+  - '§7神器-飾品'
+  - '§7Artifact-Accessories'
+
+Artifact_Back:
+  SlotRow: 5
+  SlotColumns:  6
+  RestrictionType: Artifact_Back
+  Material: Gunpowder
+  CustomModelData: 36
+  DisplayName: '§e神器-背部'
+  Lore:
+  - ''
+  - '§7神器-背部'
+  - '§7Artifact-Back'
