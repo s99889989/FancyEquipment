@@ -17,7 +17,7 @@ public class DependPlugins {
             fancyEquipment.getLogger().info(languageConfig.getString("LogMessage.LoadFancyCore"));
         }else {
             fancyEquipment.getLogger().severe("*** FancyCore is not installed or not enabled. ***");
-            fancyEquipment.getLogger().severe("*** FancyItemsy will be disabled. ***");
+            fancyEquipment.getLogger().severe("*** FancyEquipment will be disabled. ***");
             return false;
         }
 

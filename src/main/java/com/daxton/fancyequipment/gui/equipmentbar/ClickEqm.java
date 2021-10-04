@@ -9,7 +9,10 @@ import com.daxton.fancycore.other.entity.BukkitAttributeSet;
 import com.daxton.fancycore.other.playerdata.PlayerDataFancy;
 import com.daxton.fancyequipment.FancyEquipment;
 import com.daxton.fancyequipment.PlayerEqmData;
+import com.daxton.fancyequipment.api.event.EquipmentChangeEvent;
 import com.daxton.fancyequipment.config.FileConfig;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -163,6 +166,9 @@ public class ClickEqm implements GuiAction {
 
 			playerDataFancy.removeEqmAction(eqmString);
 			playerDataFancy.removeCustomValue(eqmString);
+
+			EquipmentChangeEvent equipmentChangeEvent = new EquipmentChangeEvent(player, eqmString, new ItemStack(Material.AIR));
+			Bukkit.getPluginManager().callEvent(equipmentChangeEvent);
 		}
 	}
 	//安裝裝備
@@ -212,6 +218,9 @@ public class ClickEqm implements GuiAction {
 
 		playerDataFancy.addEqmAction(eqmString, itemStack);
 		playerDataFancy.addEqmCustomValue(eqmString, itemStack);
+
+		EquipmentChangeEvent equipmentChangeEvent = new EquipmentChangeEvent(player, eqmString, itemStack);
+		Bukkit.getPluginManager().callEvent(equipmentChangeEvent);
 	}
 	//移除屬性
 	public void removeAttr(){

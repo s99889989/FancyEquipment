@@ -21,7 +21,6 @@ public final class FancyEquipment extends JavaPlugin {
         //前置插件
         if(!DependPlugins.depend()){
             fancyEquipment.setEnabled(false);
-            fancyEquipment.onDisable();
             return;
         }
         //指令

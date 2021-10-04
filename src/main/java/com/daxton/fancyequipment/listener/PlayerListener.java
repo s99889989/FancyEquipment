@@ -2,9 +2,11 @@ package com.daxton.fancyequipment.listener;
 
 import com.daxton.fancyequipment.FancyEquipment;
 import com.daxton.fancyequipment.PlayerEqmData;
+import com.daxton.fancyequipment.api.event.EquipmentChangeEvent;
 import com.daxton.fancyequipment.config.FileConfig;
 import com.daxton.fancyequipment.manager.ManagerEqm;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -74,6 +76,16 @@ public class PlayerListener implements Listener {
             //設置玩家主手位置
             PlayerEqmData playerEqmData = ManagerEqm.player_Data.get(uuid);
             playerEqmData.mainSlot = newKey;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    ItemStack itemStack = player.getInventory().getItemInMainHand();
+                    EquipmentChangeEvent equipmentChangeEvent = new EquipmentChangeEvent(player, "Main", itemStack);
+                    Bukkit.getPluginManager().callEvent(equipmentChangeEvent);
+                }
+            }.runTaskLater(FancyEquipment.fancyEquipment, 2);
+
+
         }
     }
 
